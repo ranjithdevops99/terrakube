@@ -1,5 +1,5 @@
 provider "consul" {
-    address = "${var.consul_address}"
-    scheme = "http"
-    datacenter = "dc1"
+  address    = "${var.consul_address}"
+  scheme     = "http"
+  datacenter = "dc1"
 }
