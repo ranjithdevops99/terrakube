@@ -11,7 +11,7 @@ variable "k8s_ver" {
 # list of nodes & their associate role config file
 variable "role" {
   default = {
-    "0" = "cloud-init/masterv2.yaml"
+    "0" = "cloud-init/master.yaml"
     "1" = "cloud-init/node.yaml"
     "2" = "cloud-init/node.yaml"
   }
