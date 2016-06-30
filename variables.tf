@@ -8,18 +8,27 @@ variable "k8s_ver" {
   default = "v1.2.4_coreos.1"
 }
 
-# list of nodes & their associate role config file
-variable "role" {
+# map nodes to cloud-init file
+variable "cloud_init" {
   default = {
-    "0" = "cloud-init/master.yaml"
-    "1" = "cloud-init/node.yaml"
-    "2" = "cloud-init/node.yaml"
+    "0" = "templates/cloud-init/master.yaml"
+    "1" = "templates/cloud-init/node.yaml"
+    "2" = "templates/cloud-init/node.yaml"
+  }
+}
+
+# map nodes to kubelet service file
+variable "kubelet_service_file" {
+  default = {
+    "0" = "templates/service/kubelet.master.service"
+    "1" = "templates/service/kubelet.node.service"
+    "2" = "templates/service/kubelet.node.service"
   }
 }
 
 # number of node to setup
 variable "nodes" {
-  default = "1"
+  default = "3"
 }
 
 ### openstaack provider config ###

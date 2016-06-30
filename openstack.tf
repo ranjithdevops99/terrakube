@@ -40,13 +40,22 @@ resource "openstack_compute_instance_v2" "coreos" {
 
   user_data = "${element(template_file.master_cloud_config.*.rendered, count.index)}"
 
-  # enable kube-system namespace
+  provisioner "file" {
+      source = "templates/scripts/pause_until_ready.sh"
+      destination = "/tmp/pause_until_ready.sh"
+      connection {
+        host        = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
+        user        = "core"
+        private_key = "${file("/home/goat/.ssh/id_rsa")}"
+      }
+  }
+
+  # pause until apiserver on 8080 starts responding
   provisioner "remote-exec" {
     inline = [
-      "until ( $(sudo netstat -tnlp | grep 8080 &> /dev/null) ); do sleep 10; echo waiting for apiserver to start; done",
-      "curl -H \"Content-Type: application/json\" -X POST -d'{\"apiVersion\":\"v1\",\"kind\":\"Namespace\",\"metadata\":{\"name\":\"kube-system\"}}' http://127.0.0.1:8080/api/v1/namespaces",
+      "chmod +x /tmp/pause_until_ready.sh",
+      "/tmp/pause_until_ready.sh"
     ]
-
     connection {
       host        = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
       user        = "core"
@@ -59,7 +68,7 @@ resource "openstack_compute_instance_v2" "coreos" {
 resource "null_resource" "kube_setup" {
   #depends_on = ["openstack_compute_instance_v2.coreos"]
 
-  # wripte out certificates
+  #  write out certificates
   provisioner "local-exec" {
     command = "echo \"${tls_self_signed_cert.ca.cert_pem}\" > /tmp/ca.pem"
   }
@@ -74,8 +83,13 @@ resource "null_resource" "kube_setup" {
 
   # setup kubectl
   provisioner "local-exec" {
-    command = "./setup_kubectl.sh ${openstack_networking_floatingip_v2.remote.0.address} ${var.nodes}"
+    command = "./templates/scripts/setup_kubectl.sh ${openstack_networking_floatingip_v2.remote.0.address}"
   }
+
+  #provisioner "local-exec" {
+  #  command = "rm -f /tmp/ca.pem /tmp/admin.pem /tmp/admin-key.pem"
+  #}
+
 }
 
 output "master_ip" {

@@ -1,3 +1,9 @@
+provider "consul" {
+  address    = "${var.consul_address}"
+  scheme     = "http"
+  datacenter = "dc1"
+}
+
 # list of etcd cluster client endpoints
 resource "template_file" "etcd_endpoints" {
   count    = "${var.nodes}"
@@ -52,22 +58,47 @@ resource "consul_keys" "auth_txt" {
 }
 
 # setup kubelet service
-resource "template_file" "kubelet_master_service" {
-  template = "${file("templates/service/kubelet.master.service")}"
+resource "template_file" "kubelet_service" {
+  count    = "${var.nodes}"
+  template = "${file(lookup(var.kubelet_service_file, count.index))}"
 
   vars {
     k8s_ver        = "${var.k8s_ver}"
     dns_service_ip = "${var.dns_service_ip}"
+    master_ip      = "${openstack_networking_port_v2.local.0.fixed_ip.0.ip_address}"
     ip             = "${element(openstack_networking_port_v2.local.*.fixed_ip.0.ip_address, count.index)}"
+    node_name      = "coreos${count.index}"
   }
 }
 
-# TODO problem - this file will be different for each node
-resource "consul_keys" "kubelet_master_service" {
+resource "consul_keys" "kubelet_service" {
+  count = "${var.nodes}"
+
   key {
-    name   = "kubelet_master_service"
-    path   = "etc/systemd/system/kubelet.service"
-    value  = "${template_file.kubelet_master_service.rendered}"
+    name   = "kubelet_service"
+    path   = "coreos${count.index}/etc/systemd/system/kubelet.service"
+    value  = "${element(template_file.kubelet_service.*.rendered, count.index)}"
+    delete = true
+  }
+}
+
+# render kubeconfig.yaml
+resource "template_file" "kubeconfig" {
+  count    = "${var.nodes}"
+  template = "${file("templates/conf/kubeconfig.yaml")}"
+
+  vars {
+    node_name = "coreos${count.index}"
+  }
+}
+
+resource "consul_keys" "kubeconfig" {
+  count = "${var.nodes}"
+
+  key {
+    name   = "kubeconfig_yaml"
+    path   = "coreos${count.index}/etc/kubernetes/kubeconfig.yaml"
+    value  = "${element(template_file.kubeconfig.*.rendered, count.index)}"
     delete = true
   }
 }
@@ -78,9 +109,10 @@ resource "template_file" "kube_apiserver_pod" {
 
   vars {
     k8s_ver            = "${var.k8s_ver}"
+    node_name          = "coreos0"
     service_ip_network = "${var.service_ip_network}"
     etcd_endpoints     = "${join(",", template_file.etcd_endpoints.*.rendered)}"
-    ip                 = "${element(openstack_networking_port_v2.local.*.fixed_ip.0.ip_address, count.index)}"
+    ip                 = "${openstack_networking_port_v2.local.0.fixed_ip.0.ip_address}"
   }
 }
 
@@ -150,7 +182,7 @@ resource "consul_keys" "kube_scheduler_pod" {
 # render final user-data template
 resource "template_file" "master_cloud_config" {
   count    = "${var.nodes}"
-  template = "${file(lookup(var.role, count.index))}"
+  template = "${file(lookup(var.cloud_init, count.index))}"
 
   vars {
     node_name      = "coreos${count.index}"

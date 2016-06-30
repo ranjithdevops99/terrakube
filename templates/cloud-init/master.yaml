@@ -7,13 +7,14 @@ write-files:
       FILE="$1"
       BASE_URL="http://useless.mass.goathorde.org:8500/v1/kv"
       URL_PREFIX="/$(hostname)"
-      FS_PREFIX="/tmp"
-      OUT_DIR=$(dirname ${FS_PREFIX}${FILE})
+      FS_PREFIX=""
+      OUT_DIR=$(dirname $FS_PREFIX$FILE)
+      echo -e "Writing $FILE: "
       [[ ! -d "$OUT_DIR" ]] && mkdir -p "$OUT_DIR"
-      URL="${BASE_URL}${URL_PREFIX}${FILE}?raw"
+      URL="$BASE_URL$URL_PREFIX$FILE?raw"
       HTTP_STATUS=$(curl -s -w "%{http_code}" -o /dev/null "$URL")
-      [ "$HTTP_STATUS" == "404" ] && URL="${BASE_URL}${FILE}?raw"
-      curl -s -o "${FS_PREFIX}${FILE}" "$URL"
+      [ "$HTTP_STATUS" == "404" ] && URL="$BASE_URL$FILE?raw"
+      curl -s -o "$FS_PREFIX$FILE" "$URL"
       [[ $? -eq 0 ]] && echo -e "success" || echo -e "error"
 hostname: ${node_name}
 coreos:
@@ -42,10 +43,12 @@ coreos:
 
         [Service]
         ExecStartPre=/root/c2f.sh /etc/cloud.cfg
+        ExecStartPre=/root/c2f.sh /etc/kubernetes/kubeconfig.yaml
         ExecStartPre=/root/c2f.sh /etc/kubernetes/manifests/kube-apiserver.yaml
         ExecStartPre=/root/c2f.sh /etc/kubernetes/manifests/kube-controller-manager.yaml
         ExecStartPre=/root/c2f.sh /etc/kubernetes/manifests/kube-proxy.yaml
         ExecStartPre=/root/c2f.sh /etc/kubernetes/manifests/kube-scheduler.yaml
+        ExecStartPre=/root/c2f.sh /etc/kubernetes/ssl/auth.txt
         ExecStartPre=/root/c2f.sh /etc/kubernetes/ssl/${node_name}.pem
         ExecStartPre=/root/c2f.sh /etc/kubernetes/ssl/${node_name}-key.pem
         ExecStartPre=/root/c2f.sh /etc/kubernetes/ssl/apiserver.pem
@@ -66,6 +69,7 @@ coreos:
           content: |
             [Unit]
             Requires=etcd2.service
+            After=etcd2.service
 
             [Service]
             ExecStartPre=/usr/bin/etcdctl set /coreos.com/network/config '{"Network":"${pod_network}", "Backend": {"Type": "vxlan"}}'

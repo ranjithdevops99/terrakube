@@ -10,10 +10,11 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --hostname-override=${ip} \
   --cluster-dns=${dns_service_ip} \
   --cluster-domain=cluster.local \
-  --kubeconfig=/etc/kubernetes/worker-kubeconfig.yaml \
-  --tls-cert-file=/etc/kubernetes/ssl/worker.pem \
-  --tls-private-key-file=/etc/kubernetes/ssl/worker-key.pem
+  --kubeconfig=/etc/kubernetes/kubeconfig.yaml \
+  --tls-cert-file=/etc/kubernetes/ssl/${node_name}.pem \
+  --tls-private-key-file=/etc/kubernetes/ssl/${node_name}-key.pem
 Restart=always
 RestartSec=10
+
 [Install]
 WantedBy=multi-user.target
