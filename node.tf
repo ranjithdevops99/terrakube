@@ -26,8 +26,8 @@ resource "template_file" "cluster_list" {
 }
 
 # openstack config file
-resource "template_file" "os_cloud_cfg" {
-  template = "${file("templates/conf/cloud.cfg")}"
+resource "template_file" "os_cloud_conf" {
+  template = "${file("templates/conf/cloud.conf")}"
 
   vars {
     os_user_name        = "${var.os_user_name}"
@@ -39,11 +39,11 @@ resource "template_file" "os_cloud_cfg" {
   }
 }
 
-resource "consul_keys" "os_cloud_cfg" {
+resource "consul_keys" "os_cloud_conf" {
   key {
-    name   = "cloud_cfg"
-    path   = "etc/cloud.cfg"
-    value  = "${template_file.os_cloud_cfg.rendered}"
+    name   = "cloud_conf"
+    path   = "etc/kubernetes/cloud.conf"
+    value  = "${template_file.os_cloud_conf.rendered}"
     delete = true
   }
 }

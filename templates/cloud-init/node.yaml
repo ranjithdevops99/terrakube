@@ -42,6 +42,7 @@ coreos:
         Description=distribute config files
 
         [Service]
+        ExecStartPre=/root/c2f.sh /etc/kubernetes/cloud.conf
         ExecStartPre=/root/c2f.sh /etc/kubernetes/kubeconfig.yaml
         ExecStartPre=/root/c2f.sh /etc/kubernetes/manifests/kube-proxy.yaml
         ExecStartPre=/root/c2f.sh /etc/kubernetes/ssl/${node_name}.pem
@@ -77,5 +78,5 @@ coreos:
     - name: kubelet.service
       command: start
   update:
-    group: stable
+    group: beta
     reboot-strategy: off

@@ -1,6 +1,6 @@
 ### coreos config ###
 variable "coreos_release" {
-  default = "stable"
+  default = "beta"
 }
 
 # kubernetes verson
@@ -49,7 +49,7 @@ variable "os_password" {
 }
 
 variable "os_auth_url" {
-  default = "http://nak.mass.goathorde.org:5000/v2.0"
+  default = "http://10.1.0.15:5000/v2.0"
 }
 
 variable "internal_network_id" {

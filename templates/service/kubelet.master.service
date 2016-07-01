@@ -7,9 +7,11 @@ ExecStart=/usr/lib/coreos/kubelet-wrapper \
   --register-schedulable=false \
   --allow-privileged=true \
   --config=/etc/kubernetes/manifests \
-  --hostname-override=${ip} \
+  --hostname-override=${node_name} \
   --cluster-dns=${dns_service_ip} \
-  --cluster-domain=cluster.local
+  --cluster-domain=cluster.local \
+  --cloud-provider=openstack \
+  --cloud-config=/etc/kubernetes/cloud.conf
 Restart=always
 RestartSec=10
 
