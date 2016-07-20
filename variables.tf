@@ -14,6 +14,7 @@ variable "cloud_init" {
     "0" = "templates/cloud-init/master.yaml"
     "1" = "templates/cloud-init/node.yaml"
     "2" = "templates/cloud-init/node.yaml"
+    "3" = "templates/cloud-init/node.yaml"
   }
 }
 
@@ -23,6 +24,7 @@ variable "kubelet_service_file" {
     "0" = "templates/service/kubelet.master.service"
     "1" = "templates/service/kubelet.node.service"
     "2" = "templates/service/kubelet.node.service"
+    "3" = "templates/service/kubelet.node.service"
   }
 }
 
@@ -32,16 +34,17 @@ variable "nodes" {
 }
 
 ### openstaack provider config ###
-variable "os_user_name" {
-  default = "admin"
+
+variable "os_domain_name" {
+  default = "default"
 }
 
 variable "os_tenant_name" {
   default = "admin"
 }
 
-variable "os_tenant_id" {
-  default = "ca7e9ca93265493ca83af02d9ab332ac"
+variable "os_user_name" {
+  default = "admin"
 }
 
 variable "os_password" {
@@ -49,7 +52,7 @@ variable "os_password" {
 }
 
 variable "os_auth_url" {
-  default = "http://10.1.0.15:5000/v2.0"
+  default = "http://10.1.0.15:35357/v3"
 }
 
 variable "internal_network_id" {
@@ -61,11 +64,11 @@ variable "internal_subnet_id" {
 }
 
 variable "external_network_id" {
-  default = "0976f4c4-0f33-4373-95b5-de4689e393c5"
+  default = "891b4750-2692-4ff2-afed-356b9d182df7"
 }
 
 variable "default_security_group" {
-  default = "f24da18e-253d-4eba-93f0-cb684b5108fe"
+  default = "7d53dc89-3eb8-4107-8800-8658a7394e30"
 }
 
 ### consul provider config ###
@@ -87,5 +90,5 @@ variable "k8s_service_ip" {
 }
 
 variable "dns_service_ip" {
-  default = "10.5.0.10"
+  default = "10.1.0.1"
 }

@@ -30,8 +30,9 @@ resource "template_file" "os_cloud_conf" {
   template = "${file("templates/conf/cloud.conf")}"
 
   vars {
+    os_domain_name      = "${var.os_domain_name}"
+    os_tenant_name      = "${var.os_tenant_name}"
     os_user_name        = "${var.os_user_name}"
-    os_tenant_id        = "${var.os_tenant_id}"
     os_password         = "${var.os_password}"
     os_auth_url         = "${var.os_auth_url}"
     internal_subnet_id  = "${var.internal_subnet_id}"
@@ -51,7 +52,7 @@ resource "consul_keys" "os_cloud_conf" {
 resource "consul_keys" "auth_txt" {
   key {
     name   = "auth_txt"
-    path   = "etc/kubernetes/ssl/auth.txt"
+    path   = "etc/kubernetes/auth.txt"
     value  = "password,admin,admin"
     delete = true
   }

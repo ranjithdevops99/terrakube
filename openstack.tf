@@ -1,7 +1,8 @@
 # Configure the OpenStack Provider
 provider "openstack" {
-  user_name   = "${var.os_user_name}"
+  domain_name = "${var.os_domain_name}"
   tenant_name = "${var.os_tenant_name}"
+  user_name   = "${var.os_user_name}"
   password    = "${var.os_password}"
   auth_url    = "${var.os_auth_url}"
 }
@@ -20,22 +21,22 @@ resource "openstack_networking_port_v2" "local" {
   admin_state_up     = "true"
 }
 
-resource "openstack_networking_floatingip_v2" "remote" {
-  count = "${var.nodes}"
-  pool  = "ext-net"
-}
+#resource "openstack_networking_floatingip_v2" "remote" {
+#  count = "${var.nodes}"
+#  pool  = "ext-net"
+#}
 
 # TODO don't hardcode key-pair user. generate key pair? set via variable? hmmm
 resource "openstack_compute_instance_v2" "coreos" {
   count       = "${var.nodes}"
   name        = "coreos${count.index}"
   image_name  = "coreos-${var.coreos_release}"
-  flavor_name = "m1.medium"
-  key_pair    = "goat"
+  flavor_name = "m1.coreos"
+  key_pair    = "monkey"
 
   network {
     port        = "${element(openstack_networking_port_v2.local.*.id, count.index)}"
-    floating_ip = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
+    #floating_ip = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
   }
 
   user_data = "${element(template_file.master_cloud_config.*.rendered, count.index)}"
@@ -44,7 +45,8 @@ resource "openstack_compute_instance_v2" "coreos" {
       source = "templates/scripts/pause_until_ready.sh"
       destination = "/tmp/pause_until_ready.sh"
       connection {
-        host        = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
+        #host        = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
+        host        = "${element(openstack_networking_port_v2.local.*.fixed_ip.0.ip_address, count.index)}"
         user        = "core"
         private_key = "${file("/home/goat/.ssh/id_rsa")}"
       }
@@ -57,7 +59,8 @@ resource "openstack_compute_instance_v2" "coreos" {
       "/tmp/pause_until_ready.sh"
     ]
     connection {
-      host        = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
+      #host        = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
+      host        = "${element(openstack_networking_port_v2.local.*.fixed_ip.0.ip_address, count.index)}"
       user        = "core"
       private_key = "${file("/home/goat/.ssh/id_rsa")}"
     }
@@ -83,7 +86,7 @@ resource "null_resource" "kube_setup" {
 
   # setup kubectl
   provisioner "local-exec" {
-    command = "./templates/scripts/setup_kubectl.sh ${openstack_networking_floatingip_v2.remote.0.address}"
+    command = "./templates/scripts/setup_kubectl.sh ${openstack_networking_port_v2.local.0.fixed_ip.0.ip_address}"
   }
 
   #provisioner "local-exec" {
@@ -93,5 +96,5 @@ resource "null_resource" "kube_setup" {
 }
 
 output "master_ip" {
-  value = "${openstack_networking_floatingip_v2.remote.0.address}"
+  value = "${openstack_networking_port_v2.local.0.fixed_ip.0.ip_address}"
 }

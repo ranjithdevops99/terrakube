@@ -16,7 +16,11 @@ resource "tls_self_signed_cert" "ca" {
   }
 
   validity_period_hours = "9999"
-  allowed_uses          = []
+  allowed_uses          = [
+    "cert_signing",
+    "digital_signature",
+    "any_extended"
+  ]
   is_ca_certificate     = "true"
 }
 

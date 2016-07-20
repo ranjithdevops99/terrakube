@@ -26,7 +26,6 @@ resource "tls_cert_request" "apiserver" {
   ip_addresses = [
     "${var.k8s_service_ip}",
     "${openstack_networking_port_v2.local.0.fixed_ip.0.ip_address}",
-    "${openstack_networking_floatingip_v2.remote.0.address}",
   ]
 }
 
