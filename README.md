@@ -30,7 +30,8 @@ terrform apply
 >   master_ip = 10.3.0.82
 5. Done.  kubectl should be properly configured for your cluster. Confirm with
 ```
-% kubectl cluster-info                                                                           Kubernetes master is running at https://10.3.0.82
+% kubectl cluster-info    
+Kubernetes master is running at https://10.3.0.82
 
 To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
