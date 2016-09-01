@@ -2,19 +2,26 @@
 
 This is a Terraform codification of the Kubernetes setup here <https://coreos.com/kubernetes/docs/latest/getting-started.html>
 
-It leverages the kubelet-wrapper & all setup is done via cloud-init.
+Works as follows
+- Terraform renders config files, keys, and scripts to consul
+- The OpenStack VM's are started with the generated cloud-inits
+- Cloud-init pulls all the relevant node config from consul
+- Cloud-init starts the basic services (etcd, flannel, docker) needed for kubernetes
+- Cloud-init starts kubelet-wrapper which completes the kubernetes setup
 
 ## Preliminary Setup
-To use this you will need the following
+The following tools are required
 
-1. OpenStack - Release shouldn't matter much
+1. OpenStack - distro & Release shouldn't matter much
   - requires CoreOS images in glance.  Use scripts/update-coreos.sh to upload
   - requires existing keypair
   - optional cinder for automatic Kubernetes pvc allocation
   - optional neutron lbaasv2 for Kubernetes service exposing
-2. Terraform v0.6.x - not ported to 0.7 yet
-3. consul - Terraform renders configs to consul & those are then pulled in by cloud-init
-4. kubectl [Google Cloud SDK](https://cloud.google.com/sdk/downloads)
+2. [terraform v0.6.x](https://releases.hashicorp.com/terraform/) - not ported to 0.7 yet
+3. [consul](https://www.consul.io/downloads.html)
+4. kubectl via [Google Cloud SDK](https://cloud.google.com/sdk/downloads) or [kubernetes](https://github.com/kubernetes/kubernetes/releases)
+
+Only tested on Linux but should run fine on a Mac too.
 
 ## Deploy
 
