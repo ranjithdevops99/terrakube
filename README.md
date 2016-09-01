@@ -19,10 +19,7 @@ To use this you will need the following
 ## Deploy
 
 1. Edit variables.tf. All configuration is in here.
-2. run
-```
-terrform apply
-```
+2. run `terrform apply`
 3. Wait. Entire build time is around 6 minutes on a all-in-one OpenStack instance running on an Intel NUC.
 4. If all goes well you will be greeted with something like
 > Outputs:
