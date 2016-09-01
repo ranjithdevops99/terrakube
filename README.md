@@ -19,13 +19,9 @@ To use this you will need the following
 ## Deploy
 
 1. Edit variables.tf. All configuration is in here.
-2. run `terrform apply`
-3. Wait. Entire build time is around 6 minutes on a all-in-one OpenStack instance running on an Intel NUC.
-4. If all goes well you will be greeted with something like
-> Outputs:
->
->   master_ip = 10.3.0.82
-5. Done.  kubectl should be properly configured for your cluster. Confirm with
+2. Run `terrform apply`
+3. Wait for terrform run to complete. Entire build time is around 6 minutes on a all-in-one OpenStack instance running on an Intel NUC.
+4. Done.  kubectl should be properly configured for your cluster. Confirm with
 ```
 % kubectl cluster-info    
 Kubernetes master is running at https://10.3.0.82
