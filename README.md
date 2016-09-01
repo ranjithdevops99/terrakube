@@ -1,14 +1,55 @@
-# Terraubecorestack: Terraform + Kubernetes on CoreOS on OpenStack
+# terrakube a.k.a. Terraform + Kubernetes + CoreOS on OpenStack
 
-This is a Terraform codification of the kuberenetes setup here: <https://coreos.com/kubernetes/docs/latest/getting-started.html>
+This is a Terraform codification of the Kubernetes setup here <https://coreos.com/kubernetes/docs/latest/getting-started.html>
 
-Special Sauce: uses consul for holding tf rendered files headed for the OS. Still deciding if that was a good idea or not.
+It leverages the kubelet-wrapper & all setup is done via cloud-init.
+
+## Preliminary Setup
+To use this you will need the following
+
+1. OpenStack - Release shouldn't matter much
+  - requires CoreOS images in glance.  Use scripts/update-coreos.sh to upload
+  - requires existing keypair
+  - optional cinder for automatic Kubernetes pvc allocation
+  - optional neutron lbaasv2 for Kubernetes service exposing
+2. Terraform v0.6.x - not ported to 0.7 yet
+3. consul - Terraform renders configs to consul & those are then pulled in by cloud-init
+4. kubectl [Google Cloud SDK](https://cloud.google.com/sdk/downloads)
+
+## Deploy
+
+1. Edit variables.tf. All configuration is in here.
+2. run
+```
+terrform apply
+```
+3. Wait. Entire build time is around 6 minutes on a all-in-one OpenStack instance running on an Intel NUC.
+4. If all goes well you will be greeted with something like
+> Outputs:
+>
+>   master_ip = 10.3.0.82
+5. Done.  kubectl should be properly configured for your cluster. Confirm with
+```
+% kubectl cluster-info                                                                           Kubernetes master is running at https://10.3.0.82
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
+```
+
+## Troubleshooting
+
+Network issues are most common, might need changes based on your setup.
+
+If the node create process seems like its taking an extremely long time you can ssh into any of the nodes
+```
+ssh core@<ip>
+```
+then use journalctl to see what failed.
 
 ## TODOS
 
-- remove hardcoded deps on my environment
+- don't reference OpenStack key-pair, generate
+- update Terraform version
 - add post deploy tests to confirm cluster is functioning
-
   - network connectivity
   - etcd cluster
   - fleet???
@@ -16,23 +57,8 @@ Special Sauce: uses consul for holding tf rendered files headed for the OS. Stil
   - kubernetes conformance test
 
 - validate pv / pvc cinder intergration
-
 - validate ingress
-
 - validate openstack lbaas service balancer config
-
 - sort out template files better
-
 - add extras: dns, dashboard, healthz, registry...
-
 - add calico
-
-master
-
-Jul 01 07:45:41 coreos0 kubelet-wrapper[1355]: E0701 07:45:41.953248 1355 kubelet.go:1131] Unable to construct api.Node object for kubelet: failed to get external ID from cloud provider: Failed to find object
-
-Jul 01 07:45:42 coreos0 etcd2[1016]: got unexpected response error (etcdserver: request timed out)
-
-Jul 01 07:45:39 coreos0 fleetd[1024]: ERROR engine.go:217: Engine leadership lost, renewal failed: context deadline exceeded
-
-Jul 01 07:44:55 coreos0 kernel: SELinux: mount invalid. Same superblock, different security settings for (dev mqueue, type mqueue)

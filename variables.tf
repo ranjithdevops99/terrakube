@@ -1,11 +1,21 @@
-### coreos config ###
+##############################################################################
+# cluster setup
+##############################################################################
+
+# coreos release branch
 variable "coreos_release" {
   default = "beta"
 }
 
-# kubernetes verson
+# kubernetes verson to install
+# list of tags here https://quay.io/repository/coreos/hyperkube?tab=tags
 variable "k8s_ver" {
-  default = "v1.2.4_coreos.1"
+  default = "v1.3.6_coreos.0"
+}
+
+# number of nodes in cluster
+variable "nodes" {
+  default = "3"
 }
 
 # map nodes to cloud-init file
@@ -14,7 +24,6 @@ variable "cloud_init" {
     "0" = "templates/cloud-init/master.yaml"
     "1" = "templates/cloud-init/node.yaml"
     "2" = "templates/cloud-init/node.yaml"
-    "3" = "templates/cloud-init/node.yaml"
   }
 }
 
@@ -24,16 +33,43 @@ variable "kubelet_service_file" {
     "0" = "templates/service/kubelet.master.service"
     "1" = "templates/service/kubelet.node.service"
     "2" = "templates/service/kubelet.node.service"
-    "3" = "templates/service/kubelet.node.service"
   }
 }
 
-# number of node to setup
-variable "nodes" {
-  default = "3"
+##############################################################################
+# kubernetes network
+##############################################################################
+variable "pod_network" {
+  default = "10.4.0.0/16"
 }
 
-### openstaack provider config ###
+variable "service_ip_network" {
+  default = "10.5.0.0/24"
+}
+
+variable "k8s_service_ip" {
+  default = "10.5.0.1"
+}
+
+variable "dns_service_ip" {
+  default = "10.1.0.1"
+}
+
+##############################################################################
+# openstaack provider config
+##############################################################################
+
+variable "os_flavor" {
+  default = "m1.medium"
+}
+
+variable "os_keypair" {
+  default = "monkey"
+}
+
+variable "os_keypair_private" {
+  default = "/home/goat/.ssh/id_rsa"
+}
 
 variable "os_domain_name" {
   default = "default"
@@ -71,24 +107,9 @@ variable "default_security_group" {
   default = "7d53dc89-3eb8-4107-8800-8658a7394e30"
 }
 
-### consul provider config ###
+##############################################################################
+# consul provider config
+##############################################################################
 variable "consul_address" {
   default = "useless.mass.goathorde.org:8500"
-}
-
-### kubernetes networks ###
-variable "pod_network" {
-  default = "10.4.0.0/16"
-}
-
-variable "service_ip_network" {
-  default = "10.5.0.0/24"
-}
-
-variable "k8s_service_ip" {
-  default = "10.5.0.1"
-}
-
-variable "dns_service_ip" {
-  default = "10.1.0.1"
 }

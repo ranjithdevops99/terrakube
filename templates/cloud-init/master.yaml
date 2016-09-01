@@ -5,7 +5,7 @@ write-files:
     content: |
       #!/bin/bash
       FILE="$1"
-      BASE_URL="http://useless.mass.goathorde.org:8500/v1/kv"
+      BASE_URL="http://${consul_address}/v1/kv"
       URL_PREFIX="/$(hostname)"
       FS_PREFIX=""
       OUT_DIR=$(dirname $FS_PREFIX$FILE)

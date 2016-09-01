@@ -187,6 +187,7 @@ resource "template_file" "master_cloud_config" {
 
   vars {
     node_name      = "coreos${count.index}"
+    consul_address = "${var.consul_address}"
     node_ip        = "${element(openstack_networking_port_v2.local.*.fixed_ip.0.ip_address, count.index)}"
     master_ip      = "${openstack_networking_port_v2.local.0.fixed_ip.0.ip_address}"
     cluster_list   = "${join(",", template_file.cluster_list.*.rendered)}"

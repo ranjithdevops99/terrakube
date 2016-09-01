@@ -26,13 +26,12 @@ resource "openstack_networking_port_v2" "local" {
 #  pool  = "ext-net"
 #}
 
-# TODO don't hardcode key-pair user. generate key pair? set via variable? hmmm
 resource "openstack_compute_instance_v2" "coreos" {
   count       = "${var.nodes}"
   name        = "coreos${count.index}"
   image_name  = "coreos-${var.coreos_release}"
-  flavor_name = "m1.coreos"
-  key_pair    = "monkey"
+  flavor_name = "${var.os_flavor}"
+  key_pair    = "${var.os_keypair}"
 
   network {
     port        = "${element(openstack_networking_port_v2.local.*.id, count.index)}"
@@ -48,7 +47,7 @@ resource "openstack_compute_instance_v2" "coreos" {
         #host        = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
         host        = "${element(openstack_networking_port_v2.local.*.fixed_ip.0.ip_address, count.index)}"
         user        = "core"
-        private_key = "${file("/home/goat/.ssh/id_rsa")}"
+        private_key = "${file("${var.os_keypair_private}")}"
       }
   }
 
@@ -62,7 +61,7 @@ resource "openstack_compute_instance_v2" "coreos" {
       #host        = "${element(openstack_networking_floatingip_v2.remote.*.address, count.index)}"
       host        = "${element(openstack_networking_port_v2.local.*.fixed_ip.0.ip_address, count.index)}"
       user        = "core"
-      private_key = "${file("/home/goat/.ssh/id_rsa")}"
+      private_key = "${file("${var.os_keypair_private}")}"
     }
   }
 }
